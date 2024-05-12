@@ -1,10 +1,9 @@
 import { Router } from "express";
-import { methods as UserList } from "../controllers/Users.list";
+import { methods as userController } from "../controllers/UserController";
 
 const router = Router();
 
-router.get("/", UserList.getUsers);
-router.get("/:uid", UserList.getUser);
-// router.post("/", UserList.addUsers);
+router.get("/", userController.getUserList);
+router.get("/search/by-id/:userId", userController.getUserById);
 
 export default router;
