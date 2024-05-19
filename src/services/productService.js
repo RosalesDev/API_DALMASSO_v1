@@ -5,10 +5,13 @@ const getProductById = async (req) => {
     let { productId } = req.params;
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      `SELECT productos.*, precios_venta.precio, precios_venta.moneda FROM productos
+      `SELECT productos.*, precios_venta.precio, precios_venta.moneda, cotizacionmoneda.cotizacion
+      FROM productos
       JOIN precios_venta ON precios_venta.IdProducto = productos.IdProducto
+      JOIN cotizacionmoneda ON cotizacionmoneda.codmoneda = precios_venta.moneda
       WHERE productos.IdProducto = ?
-      ORDER BY precios_venta.fechamod DESC LIMIT 1`,
+      AND precios_venta.idlista = 2
+      ORDER BY cotizacionmoneda.fecha DESC LIMIT 1`,
       productId
     );
     return results;
@@ -23,10 +26,13 @@ const getProductByNumber = async (req) => {
     let { productNumber } = req.params;
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      `SELECT productos.*, precios_venta.precio, precios_venta.moneda FROM productos
+      `SELECT productos.*, precios_venta.precio, precios_venta.moneda, cotizacionmoneda.cotizacion
+      FROM productos
       JOIN precios_venta ON precios_venta.IdProducto = productos.IdProducto
+      JOIN cotizacionmoneda ON cotizacionmoneda.codmoneda = precios_venta.moneda
       WHERE productos.numero = ?
-      ORDER BY precios_venta.fechamod DESC LIMIT 1`,
+      AND precios_venta.idlista = 2
+      ORDER BY cotizacionmoneda.fecha DESC LIMIT 1`,
       productNumber
     );
     return results;
