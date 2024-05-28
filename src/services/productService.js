@@ -63,7 +63,10 @@ const getAllProductNames = async () => {
   try {
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      "SELECT IdProducto,nombre FROM productos"
+      `SELECT productos.IdProducto, productos.nombre, precios_venta.precio, precios_venta.moneda
+       FROM productos
+       JOIN precios_venta ON precios_venta.IdProducto = productos.IdProducto
+       WHERE precios_venta.idlista = 2`
     );
     return results;
   } catch (error) {
@@ -71,6 +74,7 @@ const getAllProductNames = async () => {
     return error.message;
   }
 };
+
 
 export const methods = {
   getProductListByKeyword,
