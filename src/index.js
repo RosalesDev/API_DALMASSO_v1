@@ -6,11 +6,13 @@ const PORT = 3000;
 
 const server = express();
 
-server.use(cors({
-  origin: 'http://localhost:5173', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
-  allowedHeaders: ['Content-Type', 'Authorization'], 
-}));
+server.use(
+  cors({
+    origin: "https://dalmassogc-git-master-magallanesls-projects.vercel.app",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 server.use(app);
 
