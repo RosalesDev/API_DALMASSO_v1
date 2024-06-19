@@ -4,15 +4,16 @@ import authenticateToken from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-// Rutas existentes
-router.get('/users', userService.getUserList);
-router.get('/users/:userId', userService.getUserById);
-router.get('/user', userService.getLoggedUser);
+router.get('/users', authenticateToken, userService.getUserList);
+router.get('/users/:userId', authenticateToken, userService.getUserById);
+router.get('/user', authenticateToken, userService.getLoggedUser);
 
 // Ruta para obtener el usuario actual
-router.get('/api/user', authenticateToken, async (req, res) => {
+router.get('/current-user', authenticateToken, async (req, res) => {
     try {
-        const currentUser = await userService.getCurrentUser(req.user.id); 
+        const userId = req.user.id;
+        console.log("Authenticated user ID:", userId); 
+        const currentUser = await userService.getCurrentUser(userId); 
         if (!currentUser) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
@@ -22,5 +23,6 @@ router.get('/api/user', authenticateToken, async (req, res) => {
         res.status(500).json({ message: "Error interno del servidor" });
     }
 });
+
 
 export default router;

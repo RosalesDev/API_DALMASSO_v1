@@ -12,9 +12,8 @@ const authenticateToken = (req, res, next) => {
     if (err) {
       return res.status(403).json({ error: "Token de autenticación inválido" });
     }
-    
-    
-    req.user = decoded; 
+
+    console.log("Decoded token:", decoded);
     next();
   });
 };

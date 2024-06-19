@@ -57,13 +57,13 @@ const getLoggedUser = async (req, res) => {
   }
 };
 
-// Obtener el usuario actual (para uso interno en el backend)
+
 const getCurrentUser = async (userId) => {
   try {
     const connection = await getConnection();
     const [results, fields] = await connection.query(
       "SELECT IdUsuario, Nombre, Mail FROM usuarios WHERE IdUsuario = ?",
-      [userId]
+      [userId] 
     );
     if (results.length > 0) {
       return results[0];
