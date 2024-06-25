@@ -72,9 +72,13 @@ const getAllProductNames = async () => {
       `SELECT productos.IdProducto, 
               productos.nombre, 
               ROUND(precios_venta.precio, 2) AS precio, 
-              precios_venta.moneda
+              precios_venta.moneda,
+              CASE
+                WHEN precios_venta.moneda != 1 THEN ROUND((select cotizacion from cotizacionmoneda where codmoneda = precios_venta.moneda ORDER BY fecha DESC LIMIT 1), 2)
+                ELSE 1
+              END AS 'cotizacion'
        FROM productos
-       JOIN precios_venta ON precios_venta.IdProducto = productos.IdProducto
+       INNER JOIN precios_venta ON precios_venta.IdProducto = productos.IdProducto
        WHERE precios_venta.idlista = 2`
     );
     return results;
