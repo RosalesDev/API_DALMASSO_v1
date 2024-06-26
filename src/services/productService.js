@@ -69,7 +69,8 @@ const getAllProductNames = async () => {
   try {
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      `SELECT productos.IdProducto, 
+      `SELECT productos.IdProducto,
+              productos.Numero,
               productos.nombre, 
               ROUND(precios_venta.precio, 2) AS precio, 
               precios_venta.moneda,

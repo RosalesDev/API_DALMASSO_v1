@@ -21,5 +21,6 @@ app.use("/api/login", loginRoutes);
 app.use("/api", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/customers", customerRoutes);
+app.use("/api/users/current-user",userRoutes ) //esto lo hice por si acaso. 
 
 export default app;
