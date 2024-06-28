@@ -1,13 +1,13 @@
 import express from "express";
 import morgan from "morgan";
 import loginRoutes from "./routes/Login";
-import usersRoutes from "./routes/Users";
+import userRoutes from "./routes/Users";
 import productRoutes from "./routes/Products";
 import customerRoutes from "./routes/Customers";
-import authenticateToken from "./middleware/authMiddleware";
+import cors from "cors";
+import dotenv from 'dotenv';
 
-
-const cors =require('cors');
+dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -16,11 +16,11 @@ app.set("port", 3000);
 
 app.use(morgan("dev"));
 app.use(express.json());
-// hola
 
 app.use("/api/login", loginRoutes);
-app.use("/api/users", authenticateToken, usersRoutes);
-app.use("/api/products", authenticateToken, productRoutes);
-app.use("/api/customers", authenticateToken, customerRoutes);
+app.use("/api", userRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/customers", customerRoutes);
+app.use("/api/users/current-user",userRoutes ) //esto lo hice por si acaso. 
 
 export default app;
