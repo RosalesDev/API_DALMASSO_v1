@@ -2,7 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import loginRoutes from "./routes/Login";
 import userRoutes from "./routes/Users";
-import productRoutes from "./routes/Products";
+import productRoutes from "./routes/Products"; // Importación correcta de rutas de productos
 import customerRoutes from "./routes/Customers";
 import cors from "cors";
 import dotenv from 'dotenv';
@@ -19,8 +19,7 @@ app.use(express.json());
 
 app.use("/api/login", loginRoutes);
 app.use("/api", userRoutes);
-app.use("/api/products", productRoutes);
+app.use("/api/products", productRoutes); 
 app.use("/api/customers", customerRoutes);
-app.use("/api/users/current-user",userRoutes ) //esto lo hice por si acaso. 
 
 export default app;
