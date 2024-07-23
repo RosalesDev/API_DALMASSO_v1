@@ -19,7 +19,7 @@ app.use(express.json());
 
 app.use("/api/login", loginRoutes);
 app.use("/api", userRoutes);
-app.use("/api/products", productRoutes); 
+app.use("/api/bugets", productRoutes); 
 app.use("/api/customers", customerRoutes);
 
 export default app;

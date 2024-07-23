@@ -82,8 +82,8 @@ const addBuget = async (req, res) => {
         RecargoMoP
       } = req.body;
   
-      //validar datos que sean necesarios... creo...
-      if (!Empresa || !Letra || !IdLista || !Moneda || !MonedaCotizacion || !IdEstado || !CodigoPerfil) {
+     
+      if (!Empresa  ) {
         return res.status(400).json({ message: "Faltan datos obligatorios." });
       }
   
@@ -216,7 +216,7 @@ const addBuget = async (req, res) => {
         Comentario
       } = req.body;
   
-      // Validar campos obligatorios tengo que ver cuales son los que hay que validar aun.
+    
       if (!NroInterno || !IdProducto || !Cantidad || !Detalle || !Importe || !Precio || !ID_Presupuestos) {
         return res.status(400).json({ message: "Faltan datos obligatorios." });
       }
