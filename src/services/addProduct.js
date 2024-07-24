@@ -217,7 +217,7 @@ const addBuget = async (req, res) => {
       } = req.body;
   
     
-      if (!NroInterno || !IdProducto || !Cantidad || !Detalle || !Importe || !Precio || !ID_Presupuestos) {
+      if (!NroInterno) {
         return res.status(400).json({ message: "Faltan datos obligatorios." });
       }
   
