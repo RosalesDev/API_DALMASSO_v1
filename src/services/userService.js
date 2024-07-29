@@ -21,7 +21,7 @@ const getUserById = async (req, res) => {
     const { userId } = req.params;
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      "SELECT IdUsuario, Nombre, Mail FROM usuarios WHERE IdUsuario = ?",
+      "SELECT IdUsuario, Nombre, Mail, SucursalDefault FROM usuarios WHERE IdUsuario = ?",
       [userId]
     );
     if (results.length > 0) {
