@@ -2,7 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import loginRoutes from "./routes/Login";
 import userRoutes from "./routes/Users";
-import productRoutes from "./routes/Products"; // Importación correcta de rutas de productos
+import productRoutes from "./routes/Products"; 
 import customerRoutes from "./routes/Customers";
 import cors from "cors";
 import dotenv from 'dotenv';
