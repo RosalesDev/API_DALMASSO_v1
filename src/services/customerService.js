@@ -5,7 +5,7 @@ const getCustomerById = async (req) => {
     let { customerId } = req.params;
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      `SELECT clientes.*, ctacte.Fecha AS FECHA_SALDO,ctacte.Debe FROM clientes
+      `SELECT clientes.*, ctacte.Fecha AS FECHA_SALDO, ctacte.Debe, clientes.ExentoIIBB FROM clientes
       LEFT JOIN ctacte ON ctacte.IdCliente = clientes.IdCliente
       WHERE clientes.IdCliente = ?
       ORDER BY ctacte.Fecha DESC LIMIT 1`,
@@ -23,7 +23,7 @@ const getCustomerByNumber = async (req) => {
     let { customerNumber } = req.params;
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      `SELECT clientes.*, ctacte.Fecha AS FECHA_SALDO,ctacte.Debe FROM clientes
+      `SELECT clientes.*, ctacte.Fecha AS FECHA_SALDO, ctacte.Debe, clientes.ExentoIIBB FROM clientes
       LEFT JOIN ctacte ON ctacte.IdCliente = clientes.IdCliente
       WHERE clientes.numero = ?
       ORDER BY ctacte.Fecha DESC LIMIT 1`,
@@ -40,7 +40,7 @@ const getAllCustomerNames = async () => {
   try {
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      "SELECT IdCliente,nombre FROM clientes WHERE Tipo = 'C'"
+      "SELECT IdCliente, nombre, ExentoIIBB FROM clientes"
     );
     return results;
   } catch (error) {
@@ -56,7 +56,7 @@ const getCustomerByName = async (req) => {
     console.log("queryKeyword:", keyword);
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      "SELECT IdCliente, Nombre FROM clientes WHERE nombre like ?",
+      "SELECT IdCliente, Nombre, ExentoIIBB FROM clientes WHERE nombre like ?",
       keyword
     );
     return results;

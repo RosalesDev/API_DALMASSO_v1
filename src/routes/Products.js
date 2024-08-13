@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { methods as productController } from "../controllers/ProductController";
+import { addBuget, addBugetItems } from "../services/addProduct";
 
 const router = Router();
 
@@ -13,5 +14,9 @@ router.get(
   "/search/by-number/:productNumber",
   productController.getProductByNumber
 );
+
+
+router.post('/presupuestos', addBuget); 
+router.post('/presupuestos_articulos', addBugetItems); 
 
 export default router;
