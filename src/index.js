@@ -2,7 +2,7 @@ import app from "./app";
 import express from "express";
 import cors from "cors";
 
-const PORT = 3000;
+const PORT = 3001;
 
 const server = express();
 
