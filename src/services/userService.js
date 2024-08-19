@@ -44,7 +44,7 @@ const getLoggedUser = async (req, res) => {
 
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      "SELECT IdUsuario, Nombre, Mail,SucursalDefault  FROM usuarios WHERE IdUsuario = ?",
+      "SELECT IdUsuario, Nombre, Mail,SucursalDefault,IdVendedor FROM usuarios WHERE IdUsuario = ?",
       [userId]
     );
     if (results.length > 0) {
@@ -58,22 +58,22 @@ const getLoggedUser = async (req, res) => {
 };
 
 
-const getCurrentUser = async (userId) => {
-  try {
-    const connection = await getConnection();
-    const [results, fields] = await connection.query(
-      "SELECT IdUsuario, Nombre, Mail FROM usuarios WHERE IdUsuario = ?",
-      [userId] 
-    );
-    if (results.length > 0) {
-      return results[0];
-    } else {
-      throw new Error("Usuario no encontrado");
-    }
-  } catch (error) {
-    throw new Error("Error al obtener información del usuario: " + error.message);
-  }
-};
+// const getCurrentUser = async (userId) => {
+//   try {
+//     const connection = await getConnection();
+//     const [results, fields] = await connection.query(
+//       "SELECT IdUsuario, Nombre, Mail FROM usuarios WHERE IdUsuario = ?",
+//       [userId] 
+//     );
+//     if (results.length > 0) {
+//       return results[0];
+//     } else {
+//       throw new Error("Usuario no encontrado");
+//     }
+//   } catch (error) {
+//     throw new Error("Error al obtener información del usuario: " + error.message);
+//   }
+// };
 
 export const methods = {
   getUserList,
