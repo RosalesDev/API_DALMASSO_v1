@@ -197,6 +197,7 @@ const addBuget = async (req, res) => {
   }
 };
 
+
 // añadir artículos al presupuesto
 const addBugetItems = async (req, res) => {
   try {
@@ -209,13 +210,12 @@ const addBugetItems = async (req, res) => {
     for (const item of req.body) {
       const {
         NroInterno,
-        IdProducto,       
+        IdProducto,
       } = item;
 
       if (!IdProducto) {
         return res.status(400).json({ message: "Faltan datos obligatorios en uno o más artículos." });
       }
-
     }
 
     const connection = await getConnection();
@@ -230,6 +230,7 @@ const addBugetItems = async (req, res) => {
     res.status(500).json({ message: 'Error en el servidor.', error: err.message });
   }
 };
+
 
 export {
   addBuget,

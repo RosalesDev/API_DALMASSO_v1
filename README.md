@@ -1,7 +1,9 @@
-# Challenger-Arido-Api se uso Node.js, Express y MySQL
-
-### Para el Correcto funcionamiento se debe editar el archivo .env con los datos correspondientes.
-### Primero Ejecutar la Api, ya que esta corre en el puerto 3000 por Defecto, Luego la UI.
-
-### npm install
-### npm run dev
+# ingreso al server.
+# Buscar Carpeta en mis Documentos.
+# Hacer copia de la carpeta con fecha de update.
+# descargar proyecto actualizado.
+# Detener ejecucion de API ( pm2 stop 1)
+# reemplazar archivos modificados en carpeta
+# borra carpeta dist
+# abrir CMD para levantar api.
+# npm run build
