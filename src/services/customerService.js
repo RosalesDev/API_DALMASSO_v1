@@ -25,7 +25,7 @@ const getCustomerByNumber = async (req) => {
     let { customerNumber } = req.params;
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      `SELECT clientes.*, ctacte.Fecha AS FECHA_SALDO, ctacte.Debe, clientes.ExentoIIBB, clientes.IVA_Tipo FROM clientes
+      `SELECT clientes.*, ctacte.Fecha AS FECHA_SALDO, ctacte.Debe,clientes.Tipo, clientes.ExentoIIBB, clientes.IVA_Tipo FROM clientes
       LEFT JOIN ctacte ON ctacte.IdCliente = clientes.IdCliente
       WHERE clientes.numero = ?
       ORDER BY ctacte.Fecha DESC LIMIT 1`,
@@ -44,7 +44,7 @@ const getAllCustomerNames = async () => {
   try {
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      "SELECT IdCliente, nombre, ExentoIIBB, IVA_Tipo FROM clientes"
+      "SELECT IdCliente,Tipo, nombre, ExentoIIBB, IVA_Tipo FROM clientes"
     );
     return results;
   } catch (error) {
@@ -61,7 +61,7 @@ const getCustomerByName = async (req) => {
     console.log("queryKeyword:", keyword);
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      "SELECT IdCliente, Nombre, ExentoIIBB, IVA_Tipo FROM clientes WHERE nombre like ?",
+      "SELECT IdCliente,Tipo, Nombre, ExentoIIBB, IVA_Tipo FROM clientes WHERE nombre like ?",
       keyword
     );
     return results;

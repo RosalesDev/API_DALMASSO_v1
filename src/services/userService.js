@@ -20,7 +20,7 @@ const getUserList = async (req, res) => {
   try {
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      "SELECT IdUsuario,IdeVendedor,SucursalDefault, Nombre, Mail FROM usuarios"
+      "SELECT IdUsuario,IdVendedor,SucursalDefault, Nombre, Mail FROM usuarios"
     );
     res.json(results);
   } catch (error) {
