@@ -12,7 +12,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 
-app.set("port", 3000);
+app.set("port", 3001);
 
 app.use(morgan("dev"));
 app.use(express.json());
