@@ -44,7 +44,7 @@ const getAllCustomerNames = async () => {
   try {
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      "SELECT IdCliente,Tipo, nombre, ExentoIIBB, IVA_Tipo FROM clientes"
+      "SELECT IdCliente,Tipo, nombre, ExentoIIBB, IVA_Tipo FROM clientes where Tipo = 'C'"
     );
     return results;
   } catch (error) {
