@@ -58,7 +58,10 @@ const getLoggedUser = async (req, res) => {
 
     const connection = await getConnection();
     const [results] = await connection.query(
-      "SELECT IdUsuario, Nombre, Mail, SucursalDefault, IdVendedor FROM usuarios WHERE IdUsuario = ?",
+      `SELECT u.IdUsuario, u.Nombre, u.Mail, u.SucursalDefault, u.IdVendedor, e.CodEmpresa
+       FROM usuarios u
+       JOIN Empresa e ON u.IdVendedor = e.IdVendedor
+       WHERE u.IdUsuario = ?`,
       [userId]
     );
     if (results.length > 0) {
@@ -73,26 +76,10 @@ const getLoggedUser = async (req, res) => {
 
 
 
-// const getCurrentUser = async (userId) => {
-//   try {
-//     const connection = await getConnection();
-//     const [results, fields] = await connection.query(
-//       "SELECT IdUsuario, Nombre, Mail FROM usuarios WHERE IdUsuario = ?",
-//       [userId] 
-//     );
-//     if (results.length > 0) {
-//       return results[0];
-//     } else {
-//       throw new Error("Usuario no encontrado");
-//     }
-//   } catch (error) {
-//     throw new Error("Error al obtener información del usuario: " + error.message);
-//   }
-// };
+
 
 export const methods = {
   getUserList,
   getUserById,
-  getLoggedUser,
-  // getCurrentUser,
+  getLoggedUser, 
 };
