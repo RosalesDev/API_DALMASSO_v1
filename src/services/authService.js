@@ -5,36 +5,52 @@ const login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const connection = await getConnection();
-    const [results, fields] = await connection.query(
+    
+  
+    let [results, fields] = await connection.query(
       "SELECT * FROM usuarios WHERE mail = ?",
-      email
+      [email]
     );
 
+    // Si no se encuentra en 'usuarios', buscar en 'clientesweb'
     if (results.length === 0) {
-      return res.status(401).json({ error: "El usuario no existe." });
-    }
-    const user = results[0];
-
-    // Comparar la contraseña (esto debería ser un hash en un entorno de producción)
-    if (password !== user.Clave) {
-      return res.status(401).json({ error: "Credenciales inválidas" });
+      [results, fields] = await connection.query(
+        "SELECT * FROM clientesweb WHERE Mail = ?", 
+        [email]
+      );
     }
 
     
+    if (results.length === 0) {
+      return res.status(401).json({ error: "El usuario no existe." });
+    }
+
+    const user = results[0];
+
+    
+    if (password !== user.Clave) { 
+      return res.status(401).json({ error: "Credenciales inválidas" });
+    }
+
+   
+    const userRole = user.IdCliente ? "clientweb" : "administrator";
+
+   
     const token = sign(
       {
-        userId: user.id, 
+        userId: user.IdCliente || user.IdUsuario, 
         userName: user.Nombre, 
         SucursalDefault: user.SucursalDefault,
-        IdVendedor: user.IdVendedor
-      }, 
-      process.env.JWT_SECRET, 
+        IdVendedor: user.IdVendedor,
+        userRole: userRole  
+      },
+      process.env.JWT_SECRET,
       { expiresIn: "8h" }
     );
 
     res.json({ token });
   } catch (error) {
-    console.log("Error en la consulta de login:", error);
+    console.error("Error en la consulta de login:", error);
     return res.status(500).json({ error: "Error en el servidor" });
   }
 };
