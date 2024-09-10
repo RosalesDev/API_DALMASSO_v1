@@ -5,12 +5,24 @@ const getCustomerById = async (req) => {
     let { customerId } = req.params;
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      `SELECT clientes.*, ctacte.Fecha AS FECHA_SALDO, ctacte.Debe, clientes.ExentoIIBB, clientes.IVA_Tipo FROM clientes
-      LEFT JOIN ctacte ON ctacte.IdCliente = clientes.IdCliente
-      WHERE clientes.IdCliente = ?
-      ORDER BY ctacte.Fecha DESC LIMIT 1`,
+      `SELECT clientes.*, ctacte.Fecha AS FECHA_SALDO, ctacte.Debe, 
+              COALESCE(clientes.DescuentoHabitual, '0') AS DescuentoHabitual,
+              clientes.ExentoIIBB, clientes.IVA_Tipo 
+       FROM clientes
+       LEFT JOIN ctacte ON ctacte.IdCliente = clientes.IdCliente
+       WHERE clientes.IdCliente = ?
+       ORDER BY ctacte.Fecha DESC LIMIT 1`,
       customerId
     );
+
+    // Depuración: Verificar los datos obtenidos de la base de datos
+    console.log("Datos del cliente:", results);
+    console.log(
+      "DescuentoHabitual:",
+      typeof results[0].DescuentoHabitual,
+      results[0].DescuentoHabitual
+    );
+
     return results;
   } catch (error) {
     console.log("Error en la consulta:", error);
@@ -40,7 +52,7 @@ const getAllCustomerNames = async () => {
   try {
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      "SELECT IdCliente,Tipo, nombre, ExentoIIBB, IVA_Tipo FROM clientes where Tipo = 'C'"
+      "SELECT IdCliente,Tipo, nombre, ExentoIIBB, DescuentoHabitual, IVA_Tipo FROM clientes where Tipo = 'C'"
     );
     return results;
   } catch (error) {
@@ -56,7 +68,7 @@ const getCustomerByName = async (req) => {
     console.log("queryKeyword:", keyword);
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      "SELECT IdCliente,Tipo, Nombre, ExentoIIBB, IVA_Tipo FROM clientes WHERE nombre like ?",
+      "SELECT IdCliente,Tipo, Nombre, ExentoIIBB,DescuentoHabitual , IVA_Tipo FROM clientes WHERE nombre like ?",
       keyword
     );
     return results;
