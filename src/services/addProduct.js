@@ -10,6 +10,16 @@ const getLastNroInterno = async () => {
     throw new Error(`Error al obtener el último NroInterno: ${err.message}`);
   }
 };
+//obtener ultimo numero
+const getLastNumero = async () => {
+  try {
+    const connection = await getConnection();
+    const [rows] = await connection.query("SELECT Numero FROM presupuestos ORDER BY Numero DESC LIMIT 1");
+    return rows.length ? rows[0].Numero : 0;
+  } catch (err) {
+    throw new Error(`Error al obtener el último Numero: ${err.message}`);
+  }
+};
 
 // añadir un nuevo presupuesto
 const addBuget = async (req, res) => {
@@ -20,7 +30,6 @@ const addBuget = async (req, res) => {
       Tipo,
       Letra,
       Boca,
-      Numero,
       DescuentoTotal,
       IdCliente,
       IdVendedor,
@@ -98,9 +107,12 @@ const addBuget = async (req, res) => {
 
     const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-    // Obtener el último NroInterno y generar uno nuevo
+    // Obtener el último NroInterno y Numero y generar nuevos
     const lastNroInterno = await getLastNroInterno();
     const newNroInterno = lastNroInterno + 1;
+
+    const lastNumero = await getLastNumero();
+    const newNumero = lastNumero + 1;
 
     const newBuget = {
       Empresa,
@@ -108,7 +120,7 @@ const addBuget = async (req, res) => {
       Tipo,
       Letra,
       Boca,
-      Numero,
+      Numero: newNumero, // Aquí utilizas el nuevo Numero
       Fecha: currentDate,
       DescuentoTotal,
       IdCliente,
@@ -186,16 +198,19 @@ const addBuget = async (req, res) => {
       RecargoMoP,
       NroInterno: newNroInterno
     };
-
+    
     const connection = await getConnection();
     const result = await connection.query("INSERT INTO presupuestos SET ?", newBuget);
 
-    res.json({ message: "Presupuesto agregado con éxito", NroInterno: newNroInterno });
+    res.json({ message: "Presupuesto agregado con éxito", NroInterno: newNroInterno, Numero: newNumero });
 
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
+
+
 
 // añadir artículos al presupuesto
 const addBugetItems = async (req, res) => {
@@ -209,13 +224,12 @@ const addBugetItems = async (req, res) => {
     for (const item of req.body) {
       const {
         NroInterno,
-        IdProducto,       
+        IdProducto,
       } = item;
 
       if (!IdProducto) {
         return res.status(400).json({ message: "Faltan datos obligatorios en uno o más artículos." });
       }
-
     }
 
     const connection = await getConnection();
@@ -230,6 +244,7 @@ const addBugetItems = async (req, res) => {
     res.status(500).json({ message: 'Error en el servidor.', error: err.message });
   }
 };
+
 
 export {
   addBuget,

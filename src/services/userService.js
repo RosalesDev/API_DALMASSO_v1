@@ -1,12 +1,26 @@
 import { getConnection } from "../database/database";
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
+
+const generarToken = (usuario) => {
+  const payload = {
+    id: usuario.IdUsuario,
+    userName: usuario.Nombre,
+    SucursalDefault: usuario.SucursalDefault,
+    IdVendedor: usuario.IdVendedor,
+  };
+
+  console.log("Payload antes de firmar el token:", payload);
+
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+};
+
 
 // Obtener la lista de usuarios
 const getUserList = async (req, res) => {
   try {
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      "SELECT IdUsuario, Nombre, Mail FROM usuarios"
+      "SELECT IdUsuario,IdVendedor,SucursalDefault, Nombre, Mail FROM usuarios"
     );
     res.json(results);
   } catch (error) {
@@ -43,8 +57,8 @@ const getLoggedUser = async (req, res) => {
     const userId = decodedToken.id;
 
     const connection = await getConnection();
-    const [results, fields] = await connection.query(
-      "SELECT IdUsuario, Nombre, Mail,SucursalDefault  FROM usuarios WHERE IdUsuario = ?",
+    const [results] = await connection.query(
+      "SELECT IdUsuario, Nombre, Mail, SucursalDefault, IdVendedor FROM usuarios WHERE IdUsuario = ?",
       [userId]
     );
     if (results.length > 0) {
@@ -58,26 +72,27 @@ const getLoggedUser = async (req, res) => {
 };
 
 
-const getCurrentUser = async (userId) => {
-  try {
-    const connection = await getConnection();
-    const [results, fields] = await connection.query(
-      "SELECT IdUsuario, Nombre, Mail FROM usuarios WHERE IdUsuario = ?",
-      [userId] 
-    );
-    if (results.length > 0) {
-      return results[0];
-    } else {
-      throw new Error("Usuario no encontrado");
-    }
-  } catch (error) {
-    throw new Error("Error al obtener información del usuario: " + error.message);
-  }
-};
+
+// const getCurrentUser = async (userId) => {
+//   try {
+//     const connection = await getConnection();
+//     const [results, fields] = await connection.query(
+//       "SELECT IdUsuario, Nombre, Mail FROM usuarios WHERE IdUsuario = ?",
+//       [userId] 
+//     );
+//     if (results.length > 0) {
+//       return results[0];
+//     } else {
+//       throw new Error("Usuario no encontrado");
+//     }
+//   } catch (error) {
+//     throw new Error("Error al obtener información del usuario: " + error.message);
+//   }
+// };
 
 export const methods = {
   getUserList,
   getUserById,
   getLoggedUser,
-  getCurrentUser,
+  // getCurrentUser,
 };

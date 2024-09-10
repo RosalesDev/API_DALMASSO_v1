@@ -15,18 +15,23 @@ const login = async (req, res) => {
     }
     const user = results[0];
 
-    /*
-    Esto debería compararse contra un hash almacenado en la db.
-    Por ahora lo dejamos asi para no tocarles las claves que tienen
-    */
-
+    // Comparar la contraseña (esto debería ser un hash en un entorno de producción)
     if (password !== user.Clave) {
       return res.status(401).json({ error: "Credenciales inválidas" });
     }
 
-    const token = sign({ userId: user.id, userName: user.Nombre }, process.env.JWT_SECRET, {
-      expiresIn: "8h",
-    });
+    
+    const token = sign(
+      {
+        userId: user.id, 
+        userName: user.Nombre, 
+        SucursalDefault: user.SucursalDefault,
+        IdVendedor: user.IdVendedor
+      }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: "8h" }
+    );
+
     res.json({ token });
   } catch (error) {
     console.log("Error en la consulta de login:", error);
