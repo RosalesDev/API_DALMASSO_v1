@@ -6,6 +6,8 @@ const getProductById = async (req) => {
     const connection = await getConnection();
     const [results, fields] = await connection.query(
       `SELECT productos.*, 
+              productos.Activo, 
+              productos.ProdVenta,
               ROUND(precios_venta.precio, 2) AS precio, 
               precios_venta.moneda, 
               ROUND(cotizacionmoneda.cotizacion, 2) AS cotizacion
@@ -24,12 +26,15 @@ const getProductById = async (req) => {
   }
 };
 
+
 const getProductByNumber = async (req) => {
   try {
     let { productNumber } = req.params;
     const connection = await getConnection();
     const [results, fields] = await connection.query(
       `SELECT productos.*, 
+              productos.Activo, 
+              productos.ProdVenta,
               ROUND(precios_venta.precio, 2) AS precio, 
               precios_venta.moneda, 
               ROUND(cotizacionmoneda.cotizacion, 2) AS cotizacion
@@ -47,6 +52,7 @@ const getProductByNumber = async (req) => {
     return error.message;
   }
 };
+
 
 const getProductListByKeyword = async (req) => {
   try {
@@ -71,7 +77,9 @@ const getAllProductNames = async () => {
     const [results, fields] = await connection.query(
       `SELECT productos.IdProducto,
               productos.Numero,
-              productos.nombre, 
+              productos.nombre,
+              productos.Activo,
+              productos.ProdVenta, 
               ROUND(precios_venta.precio, 2) AS precio, 
               precios_venta.moneda,
               CASE
