@@ -7,6 +7,7 @@ const generarToken = (usuario) => {
     userName: usuario.Nombre,
     SucursalDefault: usuario.SucursalDefault,
     IdVendedor: usuario.IdVendedor,
+    role:usuario.role,
   };
 
   console.log("Payload antes de firmar el token:", payload);
