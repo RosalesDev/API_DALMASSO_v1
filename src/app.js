@@ -4,6 +4,7 @@ import loginRoutes from "./routes/Login";
 import userRoutes from "./routes/Users";
 import productRoutes from "./routes/Products";
 import customerRoutes from "./routes/Customers";
+import companyRoutes from "./routes/Company";
 import cors from "cors";
 import dotenv from "dotenv";
 
@@ -22,5 +23,6 @@ app.use("/api", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/bugets", productRoutes);
 app.use("/api/customers", customerRoutes);
+app.use("/api/companies", companyRoutes);
 
 export default app;
