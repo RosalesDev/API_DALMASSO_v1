@@ -1,5 +1,5 @@
 import { getConnection } from "../database/database";
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
 const generarToken = (usuario) => {
   const payload = {
@@ -7,21 +7,20 @@ const generarToken = (usuario) => {
     userName: usuario.Nombre,
     SucursalDefault: usuario.SucursalDefault,
     IdVendedor: usuario.IdVendedor,
-    role:usuario.role,
+    role: usuario.role,
   };
 
   console.log("Payload antes de firmar el token:", payload);
 
-  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 };
-
 
 // Obtener la lista de usuarios
 const getUserList = async (req, res) => {
   try {
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      "SELECT IdUsuario,IdVendedor,SucursalDefault, Nombre, Mail FROM usuarios"
+      "SELECT IdUsuario,IdVendedor,SucursalDefault, Nombre, Mail FROM usuarios_web"
     );
     res.json(results);
   } catch (error) {
@@ -36,7 +35,7 @@ const getUserById = async (req, res) => {
     const { userId } = req.params;
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      "SELECT IdUsuario, Nombre, Mail, SucursalDefault FROM usuarios WHERE IdUsuario = ?",
+      "SELECT IdUsuario, Nombre, Mail, SucursalDefault FROM usuarios_web WHERE IdUsuario = ?",
       [userId]
     );
     if (results.length > 0) {
@@ -60,7 +59,7 @@ const getLoggedUser = async (req, res) => {
     const connection = await getConnection();
     const [results] = await connection.query(
       `SELECT u.IdUsuario, u.Nombre, u.Mail, u.SucursalDefault, u.IdVendedor, e.CodEmpresa
-       FROM usuarios u
+       FROM usuarios_web u
        JOIN Empresa e ON u.IdVendedor = e.IdVendedor
        WHERE u.IdUsuario = ?`,
       [userId]
@@ -75,12 +74,8 @@ const getLoggedUser = async (req, res) => {
   }
 };
 
-
-
-
-
 export const methods = {
   getUserList,
   getUserById,
-  getLoggedUser, 
+  getLoggedUser,
 };

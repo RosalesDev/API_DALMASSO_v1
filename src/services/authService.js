@@ -5,17 +5,17 @@ const login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const connection = await getConnection();
-    
+
     // Buscar el usuario en la tabla 'usuarios'
     let [results, fields] = await connection.query(
-      "SELECT * FROM usuarios WHERE mail = ?",
+      "SELECT * FROM usuarios_web WHERE mail = ?",
       [email]
     );
 
     // Si no se encuentra en 'usuarios', buscar en 'clientesweb'
     if (results.length === 0) {
       [results, fields] = await connection.query(
-        "SELECT * FROM clientes_web WHERE Mail = ?", 
+        "SELECT * FROM clientes_web WHERE Mail = ?",
         [email]
       );
     }
@@ -27,7 +27,7 @@ const login = async (req, res) => {
     const user = results[0];
 
     // Verificar la contraseña
-    if (password !== user.Clave) { 
+    if (password !== user.Clave) {
       return res.status(401).json({ error: "Credenciales inválidas" });
     }
 
@@ -37,12 +37,12 @@ const login = async (req, res) => {
     // Crear el token con el rol correcto
     const token = sign(
       {
-        userId: user.IdCliente || user.IdVendedor,  // Asegúrate de que 'IdCliente' o 'IdVendedor' esté correcto para tu sistema
+        userId: user.IdCliente || user.IdVendedor, // Asegúrate de que 'IdCliente' o 'IdVendedor' esté correcto para tu sistema
         userName: user.Nombre,
         SucursalDefault: user.SucursalDefault,
         IdVendedor: user.IdVendedor,
         userRole: userRole,
-        IdCliente: user.IdCliente  // Añadir IdCliente explícitamente
+        IdCliente: user.IdCliente, // Añadir IdCliente explícitamente
       },
       process.env.JWT_SECRET,
       { expiresIn: "8h" }
