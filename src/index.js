@@ -8,7 +8,7 @@ const server = express();
 
 server.use(
   cors({
-    origin: "https://dalmassogc-git-master-magallanesls-projects.vercel.app",
+    origin: ["https://dalmassogc-git-master-magallanesls-projects.vercel.app", "http://localhost:5173"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })

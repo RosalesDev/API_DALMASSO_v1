@@ -6,13 +6,12 @@ const login = async (req, res) => {
   try {
     const connection = await getConnection();
 
-    // Buscar el usuario en la tabla 'usuarios'
     let [results, fields] = await connection.query(
       "SELECT * FROM usuarios_web WHERE mail = ?",
       [email]
     );
 
-    // Si no se encuentra en 'usuarios', buscar en 'clientesweb'
+    // Si no se encuentra en 'usuarios_web', buscar en 'clientes_web'
     if (results.length === 0) {
       [results, fields] = await connection.query(
         "SELECT * FROM clientes_web WHERE Mail = ?",
@@ -31,24 +30,31 @@ const login = async (req, res) => {
       return res.status(401).json({ error: "Credenciales inválidas" });
     }
 
-    // Determinar el rol del usuario basado en si tiene 'IdVendedor'
-    const userRole = user.IdVendedor ? "admin" : "clienteWeb";
+    // Obtener el rol directamente desde la columna 'Rol' de la base de datos
+    let userRole = user.Rol || "clienteWeb";
 
-    // Crear el token con el rol correcto
     const token = sign(
       {
-        userId: user.IdCliente || user.IdVendedor, // Asegúrate de que 'IdCliente' o 'IdVendedor' esté correcto para tu sistema
+        userId: user.IdCliente || user.IdVendedor,
         userName: user.Nombre,
         SucursalDefault: user.SucursalDefault,
         IdVendedor: user.IdVendedor,
-        userRole: userRole,
-        IdCliente: user.IdCliente, // Añadir IdCliente explícitamente
+        userRole: user.Rol,
+        IdCliente: user.IdCliente
       },
       process.env.JWT_SECRET,
       { expiresIn: "8h" }
     );
 
-    // Depurar el token generado
+    console.log({
+      userId: user.IdCliente || user.IdVendedor,
+      userName: user.Nombre,
+      SucursalDefault: user.SucursalDefault,
+      IdVendedor: user.IdVendedor,
+      userRole: user.Rol,  // Debe coincidir con la columna de la base de datos
+      IdCliente: user.IdCliente
+    });
+
     console.log("Token generado:", token);
 
     res.json({ token });
