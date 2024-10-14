@@ -15,10 +15,10 @@ const getProductListByKeyword = async (req, res) => {
   res.json(productList);
 };
 
-const getAllProductNames = async (req, res) => {
+const getAllProductsAndByName = async (req, res) => {
   try {
-    const productNamesList = await productService.getAllProductNames();
-    res.json(productNamesList);
+    const productList = await productService.getAllProductsAndByName(req);
+    res.json(productList);
   } catch (error) {
     res.status(500).json({ error: "Error fetching product names" });
   }
@@ -26,7 +26,7 @@ const getAllProductNames = async (req, res) => {
 
 export const methods = {
   getProductListByKeyword,
-  getAllProductNames,
+  getAllProductsAndByName,
   getProductById,
   getProductByNumber,
 };
