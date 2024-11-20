@@ -4,7 +4,7 @@ const getCompanies = async (req) => {
   try {
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      "SELECT CodEmpresa, Nombre, Numero FROM empresas"
+      "SELECT CodEmpresa, Nombre,Referencia, Numero FROM empresas"
     );
     return results;
   } catch (error) {

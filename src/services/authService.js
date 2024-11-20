@@ -25,12 +25,12 @@ const login = async (req, res) => {
 
     const user = results[0];
 
-    // Verificar la contraseña
+    
     if (password !== user.Clave) {
       return res.status(401).json({ error: "Credenciales inválidas" });
     }
 
-    // Obtener el rol directamente desde la columna 'Rol' de la base de datos
+    
     let userRole = user.Rol || "clienteWeb";
 
     const token = sign(
