@@ -1,22 +1,21 @@
 import { getInvoice } from "../services/invoiceService";
 
-const InvoiceController = async (req, res) => {
+const getInvoicesByClientIdController = async (req, res) => {
   try {
-    const invoiceData = await getInvoice.getInvoiceData(req);
+    const { idCliente } = req.params;
+    const invoices = await getInvoice.getInvoicesByClientId(idCliente);
 
-    if (invoiceData.error) {
-      return res.status(400).json({ success: false, error: invoiceData.error });
+    if (invoices.error) {
+      return res.status(400).json({ success: false, error: invoices.error });
     }
 
-    res.json({ success: true, data: invoiceData });
+    res.json({ success: true, data: invoices });
   } catch (err) {
     console.error("Error en el controlador:", err);
-    res
-      .status(500)
-      .json({ success: false, error: "Error interno del servidor" });
+    res.status(500).json({ success: false, error: "Error interno del servidor" });
   }
 };
 
 export const methods = {
-  getInvoice: InvoiceController,
+  getInvoicesByClientId: getInvoicesByClientIdController,
 };

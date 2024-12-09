@@ -68,7 +68,7 @@ const getCustomerByName = async (req) => {
     console.log("queryKeyword:", keyword);
     const connection = await getConnection();
     const [results, fields] = await connection.query(
-      "SELECT IdCliente,Tipo, Nombre, ExentoIIBB,DescuentoHabitual , IVA_Tipo FROM clientes WHERE nombre like ?",
+      "SELECT IdCliente,Tipo, Nombre, ExentoIIBB,Domicilio, DescuentoHabitual , IVA_Tipo FROM clientes WHERE nombre like ?",
       keyword
     );
     return results;

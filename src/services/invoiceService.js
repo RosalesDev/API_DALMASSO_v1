@@ -1,35 +1,46 @@
 import { getConnection } from "../database/database";
 
-const getInvoiceData = async (req) => {
+const getInvoicesByClientId = async (idCliente) => {
   try {
-    const { invoiceNumber } = req.params;
     const connection = await getConnection();
 
     const query = `
-            SELECT 
-                Letra,
-                Boca,
-                Numero,
-                IdCliente,
-                NroInterno,
-                CAE_VENCIMIENTO,
-                CAE,
-                Subtotal2,
-                Total,
-                CodAfip
-            FROM facturas
-            WHERE Numero = ?`;
+      SELECT
+        Letra,
+        Boca,
+        Numero,
+        Fecha,
+        IdCliente,
+        NombreCondVenta,
+        Iva_Tipo,
+        DescuentoTotal,
+        NroInterno,
+        Pagada,
+        MontoComprobante,
+        PercepcionIIBB,
+        CAE_VENCIMIENTO,
+        CAE,
+        Subtotal2,
+        Total,
+        CodAfip
+      FROM facturas
+      WHERE IdCliente = ?
+    `;
+ console.log(getInvoicesByClientId);
+    const [results] = await connection.query(query, [idCliente]);
 
-    const [results] = await connection.query(query, [invoiceNumber]);
-
-    await connection.end();
-    return results;
+    
+    if (results && results.length > 0) {
+      return results;
+    } else {
+      throw new Error('Facturas no encontradas');
+    }
   } catch (err) {
-    console.log("Error en la consulta:", err);
-    return { error: err.message };
+    console.error("Error en la consulta:", err);
+    throw err;
   }
 };
 
 export const getInvoice = {
-  getInvoiceData,
+  getInvoicesByClientId,
 };

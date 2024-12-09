@@ -1,13 +1,10 @@
-import { Router } from "express";
-import { methods as InvoiceController } from "../controllers/InvoiceController";
-import authenticateToken from "../middleware/authMiddleware";
+import express from 'express';
+import { methods as InvoiceController } from '../controllers/InvoiceController';
+import authenticateToken from '../middleware/authMiddleware';
 
-const router = Router();
+const router = express.Router();
 
-router.get(
-  "/by-number/:invoiceNumber",
-  authenticateToken,
-  InvoiceController.getInvoice
-);
+// Ruta para obtener facturas por ID de cliente
+router.get('/by-client/:idCliente', authenticateToken, InvoiceController.getInvoicesByClientId);
 
 export default router;
