@@ -6,32 +6,71 @@ const getInvoicesByClientId = async (idCliente) => {
 
     const query = `
       SELECT
-        Letra,
-        Boca,
-        Numero,
-        Fecha,
-        IdCliente,
-        NombreCondVenta,
-        Iva_Tipo,
-        DescuentoTotal,
-        NroInterno,
-        Pagada,
-        MontoComprobante,
-        PercepcionIIBB,
-        CAE_VENCIMIENTO,
-        CAE,
-        Subtotal2,
-        Total,
-        CodAfip
-      FROM facturas
-      WHERE IdCliente = ?
+        f.Letra,
+        f.Boca,
+        f.Numero,
+        f.Fecha,
+        f.IdCliente,
+        f.NombreCondVenta,
+        f.Iva_Tipo,
+        xt.TipoIva AS Iva_Tipo_Descripcion,
+        f.DescuentoTotal,
+        f.NroInterno,
+        f.Pagada,
+        f.MontoComprobante,
+        f.PercepcionIIBB,
+        f.CAE_VENCIMIENTO,
+        f.CAE,
+        f.Subtotal2,
+        f.Total,
+        f.CodAfip,
+        fa.IdProducto,
+        fa.Cantidad,
+        fa.Detalle,
+        fa.Precio,
+        fa.Importe,
+        fa.Descuento,
+        fa.alic_iva,
+        (SELECT SUM(importe * (Alic_IVA / 100)) FROM facturas_articulos WHERE nrointerno = f.NroInterno GROUP BY alic_iva) AS IVA_Discriminado
+      FROM facturas f
+      LEFT JOIN facturas_articulos fa ON f.NroInterno = fa.NroInterno
+      LEFT JOIN xtipoiva xt ON f.Iva_Tipo = xt.Codigo
+      WHERE f.IdCliente = ?
     `;
- console.log(getInvoicesByClientId);
+
     const [results] = await connection.query(query, [idCliente]);
 
-    
     if (results && results.length > 0) {
-      return results;
+      const invoices = {};
+
+      results.forEach(row => {
+        const { NroInterno, ...invoiceData } = row;
+        const { IdProducto, Cantidad, Detalle, Precio, Importe, Descuento, alic_iva, IVA_Discriminado, Subtotal2, Total, ...rest } = invoiceData;
+
+        if (!invoices[NroInterno]) {
+          invoices[NroInterno] = {
+            ...rest,
+            articulos: [],
+            IVA_Discriminado: IVA_Discriminado ? parseFloat(IVA_Discriminado).toFixed(2) : 0.00,  // Formatear el IVA discriminado
+            Subtotal2: Subtotal2 ? parseFloat(Subtotal2).toFixed(2) : 0.00,  
+            Total: Total ? parseFloat(Total).toFixed(2) : 0.00  
+          };
+        }
+
+        if (IdProducto) {
+          invoices[NroInterno].articulos.push({
+            IdProducto,
+            Cantidad,
+            Detalle,
+            Precio,
+            Importe,
+            Descuento,
+            alic_iva
+          });
+        }
+      });
+
+      return Object.values(invoices);
     } else {
       throw new Error('Facturas no encontradas');
     }

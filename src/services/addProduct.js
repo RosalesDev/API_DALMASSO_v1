@@ -1,6 +1,6 @@
 import { getConnection } from "../database/database";
 
-// obtener el último NroInterno generado
+// Obtener el último NroInterno generado
 const getLastNroInterno = async () => {
   try {
     const connection = await getConnection();
@@ -10,7 +10,8 @@ const getLastNroInterno = async () => {
     throw new Error(`Error al obtener el último NroInterno: ${err.message}`);
   }
 };
-//obtener ultimo numero
+
+// Obtener último número
 const getLastNumero = async () => {
   try {
     const connection = await getConnection();
@@ -21,7 +22,7 @@ const getLastNumero = async () => {
   }
 };
 
-// añadir un nuevo presupuesto
+// Añadir un nuevo presupuesto
 const addBuget = async (req, res) => {
   try {
     const {
@@ -98,14 +99,13 @@ const addBuget = async (req, res) => {
       IdServicioTecnico,
       CAE,
       DescuMoP,
-      RecargoMoP
+      RecargoMoP,
+      Fecha  // Asegúrate de recibir la fecha desde el frontend
     } = req.body;
 
-    if (!Empresa) {
+    if (!Empresa || !Fecha) {
       return res.status(400).json({ message: "Faltan datos obligatorios." });
     }
-
-    const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
     // Obtener el último NroInterno y Numero y generar nuevos
     const lastNroInterno = await getLastNroInterno();
@@ -120,8 +120,8 @@ const addBuget = async (req, res) => {
       Tipo,
       Letra,
       Boca,
-      Numero: newNumero, // Aquí utilizas el nuevo Numero
-      Fecha: currentDate,
+      Numero: newNumero, 
+      Fecha,  
       DescuentoTotal,
       IdCliente,
       IdVendedor,
@@ -129,16 +129,16 @@ const addBuget = async (req, res) => {
       Obs,
       Condicion,
       Anulada,
-      Alta: currentDate,
+      Alta: Fecha,  
       Remito,
       Iva_Tipo,
       IdLista,
       Factura,
-      FechaMOD: currentDate,
+      FechaMOD: Fecha,  
       UserMOD,
-      FechaALTA: currentDate,
+      FechaALTA: Fecha,  
       UserALTA,
-      FechaBAJA: currentDate,
+      FechaBAJA: Fecha,  
       UserBAJA,
       AfectaStock,
       NombreCondVenta,
@@ -159,7 +159,7 @@ const addBuget = async (req, res) => {
       RecargoMonto,
       IdDias,
       PantallaCerroOK,
-      FechaIVA: currentDate,
+      FechaIVA: Fecha,  
       ImprimeComodines,
       YaSeImprimio,
       Vencimiento1,
@@ -198,7 +198,7 @@ const addBuget = async (req, res) => {
       RecargoMoP,
       NroInterno: newNroInterno
     };
-    
+
     const connection = await getConnection();
     const result = await connection.query("INSERT INTO presupuestos SET ?", newBuget);
 
@@ -209,10 +209,7 @@ const addBuget = async (req, res) => {
   }
 };
 
-
-
-
-// añadir artículos al presupuesto
+// Añadir artículos al presupuesto
 const addBugetItems = async (req, res) => {
   try {
     console.log("Datos del artículo recibidos:", req.body);
@@ -244,7 +241,6 @@ const addBugetItems = async (req, res) => {
     res.status(500).json({ message: 'Error en el servidor.', error: err.message });
   }
 };
-
 
 export {
   addBuget,
