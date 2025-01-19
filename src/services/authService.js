@@ -11,7 +11,7 @@ const login = async (req, res) => {
       [email]
     );
 
-    // Si no se encuentra en 'usuarios_web', buscar en 'clientes_web'
+    // Si no se encuentra en 'usuarios_web', buscar en 'clientes_web.'
     if (results.length === 0) {
       [results, fields] = await connection.query(
         "SELECT * FROM clientes_web WHERE Mail = ?",
