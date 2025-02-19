@@ -15,6 +15,28 @@ const generarToken = (usuario) => {
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 };
 
+// **Nueva función: Generar enlace único para el cliente**
+const generarEnlaceUnico = async (req, res) => {
+  try {
+    const { idCliente, dni } = req.body;
+
+    if (!idCliente || !dni) {
+      return res.status(400).json({ message: "Faltan datos necesarios" });
+    }
+
+    // Crear el token
+    const payload = { idCliente, dni };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "24h" });
+
+    // Generar el enlace
+    const link = `https://sistema.dalmasso.com.ar/saldo#${token}`;
+    res.json({ link });
+  } catch (error) {
+    console.log("Error al generar el enlace:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Obtener la lista de usuarios
 const getUserList = async (req, res) => {
   try {
@@ -74,8 +96,37 @@ const getLoggedUser = async (req, res) => {
   }
 };
 
+// **Nueva función: Obtener facturas usando el token del enlace**
+const getFacturasPorEnlace = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    // Verificar el token
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+    const connection = await getConnection();
+    const [results] = await connection.query(
+      `SELECT f.IdFactura, f.Monto, f.Fecha
+       FROM facturas f
+       WHERE f.IdCliente = ?`,
+      [payload.idCliente]
+    );
+
+    if (results.length > 0) {
+      res.json(results);
+    } else {
+      res.status(404).json({ message: "No se encontraron facturas para este cliente" });
+    }
+  } catch (error) {
+    console.log("Error al obtener facturas:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const methods = {
   getUserList,
   getUserById,
   getLoggedUser,
+  generarEnlaceUnico, // Nueva función para generar enlaces
+  getFacturasPorEnlace, // Nueva función para obtener facturas por enlace
 };

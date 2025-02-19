@@ -8,6 +8,7 @@ router.get('/users', authenticateToken, userService.getUserList);
 router.get('/users/:userId', authenticateToken, userService.getUserById);
 router.get('/user', authenticateToken, userService.getLoggedUser);
 
+
 // Ruta para obtener el usuario actual no estaria funcionando. T.T
 router.get('/current-user', authenticateToken, async (req, res) => {
     console.log("esto es req", req);
