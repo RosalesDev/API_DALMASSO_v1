@@ -104,39 +104,39 @@ const getInvoiceByPublicParams = async (IdCliente, Nombre) => {
     // Luego, buscar las facturas del cliente
     const invoiceQuery = `
     SELECT
-      f.Letra,
-      f.Boca,
-      f.Numero,
-      f.Fecha,
-      f.IdCliente,
-      f.NombreCondVenta,
-      f.Tipo,
-      f.Iva_Tipo,
-      xt.TipoIva AS Iva_Tipo_Descripcion,
-      f.DescuentoTotal,
-      f.NroInterno,
-      f.Pagada,
-      f.MontoComprobante,
-      f.PercepcionIIBB,
-      f.CAE_VENCIMIENTO,
-      f.CAE,
-      f.Subtotal2,
-      f.Total,
-      f.CodAfip,
-      fa.IdProducto,
-      fa.Cantidad,
-      fa.Detalle,
-      fa.Precio,
-      fa.Importe,
-      fa.Descuento,
-      fa.alic_iva,
-      (SELECT SUM(fa2.Importe * (fa2.alic_iva / 100))
-       FROM facturas_articulos fa2
-       WHERE fa2.NroInterno = f.NroInterno) AS IVA_Discriminado
-    FROM facturas f
-    LEFT JOIN facturas_articulos fa ON f.NroInterno = fa.NroInterno
-    LEFT JOIN xtipoiva xt ON f.Iva_Tipo = xt.Codigo
-    WHERE f.IdCliente = ?
+    f.Letra,
+    f.Boca,
+    f.Numero,
+    f.Fecha,
+    f.IdCliente,
+    f.NombreCondVenta,
+    f.Tipo,
+    f.Iva_Tipo,
+    xt.TipoIva AS Iva_Tipo_Descripcion,
+    f.DescuentoTotal,
+    f.NroInterno,
+    f.Pagada,
+    f.MontoComprobante,
+    f.PercepcionIIBB,
+    f.CAE_VENCIMIENTO,
+    f.CAE,
+    f.Subtotal2,
+    f.Total,
+    f.CodAfip,
+    fa.IdProducto,
+    fa.Cantidad,
+    fa.Detalle,
+    fa.Precio,
+    fa.Importe,
+    fa.Descuento,
+    fa.alic_iva,
+    (SELECT SUM(fa2.Importe * (fa2.alic_iva / 100))
+     FROM facturas_articulos fa2
+     WHERE fa2.NroInterno = f.NroInterno) AS IVA_Discriminado
+FROM facturas f
+LEFT JOIN facturas_articulos fa ON f.NroInterno = fa.NroInterno
+LEFT JOIN xtipoiva xt ON f.Iva_Tipo = xt.Codigo
+WHERE f.IdCliente = ?
     `;
 
     const [results] = await connection.query(invoiceQuery, [IdCliente]);

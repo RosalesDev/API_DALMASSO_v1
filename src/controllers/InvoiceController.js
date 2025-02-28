@@ -1,6 +1,6 @@
 import { getInvoice } from "../services/invoiceService";
 
-const getInvoicesByClientIdController = async (req, res) => {
+const getInvoicesByClientId = async (req, res) => {
   try {
     const { idCliente } = req.params;
     const invoices = await getInvoice.getInvoicesByClientId(idCliente);
@@ -17,7 +17,7 @@ const getInvoicesByClientIdController = async (req, res) => {
 };
 
 // Acceso público
-const getInvoiceByPublicParamsController = async (req, res) => {
+const getInvoiceByPublicParams = async (req, res) => {
   try {
     const { IdCliente, Nombre } = req.params;
 
@@ -39,6 +39,6 @@ const getInvoiceByPublicParamsController = async (req, res) => {
 };
 
 export const methods = {
-  getInvoicesByClientId: getInvoicesByClientIdController,
-  getInvoiceByPublicParams: getInvoiceByPublicParamsController
+  getInvoicesByClientId,
+  getInvoiceByPublicParams,
 };
