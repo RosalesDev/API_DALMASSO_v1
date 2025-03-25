@@ -7,7 +7,7 @@ const router = express.Router();
 // Ruta para obtener facturas por ID de cliente (requiere autenticación)
 router.get('/by-client/:idCliente', authenticateToken, InvoiceController.getInvoicesByClientId);
 
-// Nueva ruta para acceso público a facturas (sin autenticación)
-router.get('/public/:IdCliente/:Nombre', InvoiceController.getInvoiceByPublicParams);
+// Nueva ruta para acceso público a facturas utilizando Numero y Cuit (sin autenticación)
+router.get('/public/:Numero/:Cuit', InvoiceController.getInvoiceByPublicParams);
 
 export default router;

@@ -55,7 +55,7 @@ const login = async (req, res) => {
       IdCliente: user.IdCliente
     });
 
-    console.log("Token generado:", token);
+    // console.log("Token generado:", token);
 
     res.json({ token });
   } catch (error) {

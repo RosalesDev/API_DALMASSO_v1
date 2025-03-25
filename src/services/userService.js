@@ -10,7 +10,7 @@ const generarToken = (usuario) => {
     role: usuario.role,
   };
 
-  console.log("Payload antes de firmar el token:", payload);
+  // console.log("Payload antes de firmar el token:", payload);
 
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 };

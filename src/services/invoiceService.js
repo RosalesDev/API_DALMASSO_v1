@@ -84,22 +84,25 @@ WHERE f.IdCliente = ?
 };
 
 // Acceso público
-const getInvoiceByPublicParams = async (IdCliente, Nombre) => {
+const getInvoiceByPublicParams = async (Numero, Cuit) => {
   try {
-    console.log(`Parámetros recibidos: IdCliente=${IdCliente}, Nombre=${Nombre}`);
+    console.log(`Parámetros recibidos: Numero=${Numero}, Cuit=${Cuit}`);
 
     const connection = await getConnection();
 
-    // Primero, verificar que el cliente existe
+    // Primero, verificar que el cliente existe y obtener sus datos
     const clientQuery = `
-    SELECT IdCliente FROM clientes WHERE IdCliente = ? AND Nombre = ?
+    SELECT IdCliente, Nombre, Domicilio, CUIT FROM clientes WHERE Numero = ? AND Cuit = ?
     `;
 
-    const [clientResults] = await connection.query(clientQuery, [IdCliente, Nombre]);
+    const [clientResults] = await connection.query(clientQuery, [Numero, Cuit]);
 
     if (clientResults.length === 0) {
       throw new Error('Cliente no encontrado');
     }
+
+    const clientData = clientResults[0];
+    const clientId = clientData.IdCliente;
 
     // Luego, buscar las facturas del cliente
     const invoiceQuery = `
@@ -139,9 +142,9 @@ LEFT JOIN xtipoiva xt ON f.Iva_Tipo = xt.Codigo
 WHERE f.IdCliente = ?
     `;
 
-    const [results] = await connection.query(invoiceQuery, [IdCliente]);
+    const [results] = await connection.query(invoiceQuery, [clientId]);
 
-    console.log(`Resultados de la consulta:`, results);
+    // console.log(`Resultados de la consulta:`, results);
 
     if (results && results.length > 0) {
       const invoices = {};
@@ -156,7 +159,10 @@ WHERE f.IdCliente = ?
             articulos: [],
             IVA_Discriminado: IVA_Discriminado ? parseFloat(IVA_Discriminado).toFixed(2) : 0.00,  // Formatear el IVA discriminado
             Subtotal2: Subtotal2 ? parseFloat(Subtotal2).toFixed(2) : 0.00,
-            Total: Total ? parseFloat(Total).toFixed(2) : 0.00
+            Total: Total ? parseFloat(Total).toFixed(2) : 0.00,
+            Nombre: clientData.Nombre, // Agregar nombre del cliente
+            Domicilio: clientData.Domicilio, // Agregar domicilio del cliente
+            CUIT: clientData.CUIT // Agregar CUIT del cliente
           };
         }
 
@@ -182,6 +188,7 @@ WHERE f.IdCliente = ?
     throw err;
   }
 };
+
 
 export const getInvoice = {
   getInvoicesByClientId,

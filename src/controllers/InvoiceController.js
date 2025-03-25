@@ -19,13 +19,13 @@ const getInvoicesByClientId = async (req, res) => {
 // Acceso público
 const getInvoiceByPublicParams = async (req, res) => {
   try {
-    const { IdCliente, Nombre } = req.params;
+    const { Numero, Cuit } = req.params;
 
-    if (!IdCliente || !Nombre) {
-      return res.status(400).json({ success: false, error: 'Parámetros IdCliente y Nombre son requeridos' });
+    if (!Numero || !Cuit) {
+      return res.status(400).json({ success: false, error: 'Parámetros Numero y Cuit son requeridos' });
     }
 
-    const invoices = await getInvoice.getInvoiceByPublicParams(IdCliente, Nombre);
+    const invoices = await getInvoice.getInvoiceByPublicParams(Numero, Cuit);
 
     if (invoices.error) {
       return res.status(400).json({ success: false, error: invoices.error });

@@ -58,7 +58,7 @@ const getProductListByKeyword = async (req) => {
   try {
     let { keyword } = req.params;
     keyword = "%" + keyword + "%";
-    console.log("queryKeyword:", keyword);
+    // console.log("queryKeyword:", keyword);
     const connection = await getConnection();
     const [results, fields] = await connection.query(
       "SELECT IdProducto, Nombre FROM productos WHERE nombre LIKE ?",

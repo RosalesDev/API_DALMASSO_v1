@@ -7,7 +7,7 @@ const getAllBudgets = async () => {
     connection = await getConnection();
 
     const [budgetRows] = await connection.query("SELECT * FROM presupuestos");
-    console.log('Resultados de la consulta de presupuestos:', budgetRows);
+    // console.log('Resultados de la consulta de presupuestos:', budgetRows);
 
     if (budgetRows.length === 0) {
       console.log('No se encontró ningún presupuesto');
