@@ -1,19 +1,20 @@
-import mysql from 'mysql2/promise';
-import config from '../config';
+import mysql from "mysql2/promise";
+import config from "../config";
 
-const createConnection = async () => {
-  return mysql.createConnection({
-    host: config.host,
-    database: config.database,
-    user: config.user,
-    password: config.password,
-  });
+const pool = mysql.createPool({
+  host: config.host,
+  user: config.user,
+  password: config.password,
+  database: config.database,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
+
+const getConnection = () => {
+  return pool;
 };
 
-export const getConnection = async () => {
-  return createConnection();
-};
-
-export default {
+module.exports = {
   getConnection,
 };
