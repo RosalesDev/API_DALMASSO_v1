@@ -1,18 +1,31 @@
-import { getConnection } from '../database/database';
+import { getConnection } from '../database/database.js';
 
-const getAllBudgets = async () => {
+export const getAllBudgets = async () => {
   let connection;
   try {
-    console.log('Obteniendo todos los presupuestos');
+    console.log('Obteniendo presupuestos con datos del cliente y vendedor');
     connection = await getConnection();
 
-    const [budgetRows] = await connection.query("SELECT * FROM presupuestos");
-    // console.log('Resultados de la consulta de presupuestos:', budgetRows);
+    const [budgetRows] = await connection.query(`
+      SELECT
+        p.IdCliente,
+        p.Tipo,
+        p.Empresa,
+        p.NroInterno,
+        p.FechaALTA,
+        p.MontoComprobante,
+        p.NroInterno,      
+        c.Nombre AS NombreCliente,
+        c.Domicilio,
+        c.CUIT,
+        c.IVA_Tipo,
+        u.Nombre AS NombreVendedor
+      FROM presupuestos p
+      LEFT JOIN clientes c ON p.IdCliente = c.IdCliente
+      LEFT JOIN usuarios u ON p.IdVendedor = u.IdVendedor
+    `);
 
-    if (budgetRows.length === 0) {
-      console.log('No se encontró ningún presupuesto');
-      return [];
-    }
+    if (budgetRows.length === 0) return [];
 
     const budgetsWithItems = await Promise.all(
       budgetRows.map(async (budget) => {
@@ -20,8 +33,6 @@ const getAllBudgets = async () => {
           "SELECT * FROM presupuestos_articulos WHERE NroInterno = ?",
           [budget.NroInterno]
         );
-        console.log(`Artículos encontrados para NroInterno ${budget.NroInterno}:`, itemsRows);
-
         return {
           ...budget,
           items: itemsRows,
@@ -34,10 +45,35 @@ const getAllBudgets = async () => {
     console.error(`Error al obtener los presupuestos: ${err.message}`);
     throw new Error(`Error al obtener los presupuestos: ${err.message}`);
   } finally {
-    if (connection) {
-      await connection.end();
-    }
+    if (connection) await connection.end();
   }
 };
 
-export default getAllBudgets;
+export const updateBudgetState = async (id, estado) => {
+  if (!id || !estado) {
+    throw new Error('ID del cliente y nuevo estado son requeridos');
+  }
+
+  let connection;
+  try {
+    connection = await getConnection();
+
+    const [result] = await connection.query(
+      "UPDATE presupuestos SET Tipo = ? WHERE IdCliente = ? AND Tipo = 10",
+      [estado, id]
+    );
+
+    if (result.affectedRows === 0) {
+      console.warn(`No se actualizó el presupuesto con IdCliente ${id}. Puede que ya haya sido procesado o no exista.`);
+      throw new Error('No se encontró el presupuesto o ya ha sido procesado');
+    }
+
+    console.log(`✅ Estado del presupuesto con IdCliente ${id} actualizado a ${estado}`);
+    return { message: 'Estado del presupuesto actualizado correctamente' };
+  } catch (err) {
+    console.error(`Error al actualizar el estado del presupuesto: ${err.message}`, err);
+    throw new Error('Error interno del servidor');
+  } finally {
+    if (connection) await connection.end();
+  }
+};
