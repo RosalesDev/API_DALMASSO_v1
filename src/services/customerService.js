@@ -78,9 +78,31 @@ const getCustomerByName = async (req) => {
   }
 };
 
+const getCustomerBalanceByBranch = async (req) => {
+  try {
+    const { customerId } = req.params;
+    const connection = await getConnection();
+    const [results, fields] = await connection.query(
+      `SELECT e.Nombre AS nombreSucursal, c.sucursal, SUM(c.Debe - c.Haber) AS saldo
+       FROM ctacte c
+       JOIN empresas e ON c.sucursal = e.CodEmpresa
+       WHERE c.IdCliente = ?
+       GROUP BY c.sucursal, e.Nombre`,
+      [customerId]
+    );
+    return results;
+  } catch (error) {
+    console.log("Error al obtener saldo por sucursal:", error);
+    return error.message;
+  }
+};
+
+
+
 export const methods = {
   getCustomerById,
   getCustomerByNumber,
   getAllCustomerNames,
   getCustomerByName,
+  getCustomerBalanceByBranch,
 };

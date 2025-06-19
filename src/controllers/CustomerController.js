@@ -20,9 +20,15 @@ const getCustomerByName = async (req, res) => {
   res.json(customerList);
 };
 
+const getCustomerBalanceByBranch = async (req, res) => {
+  const customerBalance = await customerService.getCustomerBalanceByBranch(req);
+  res.json(customerBalance);
+}
+
 export const methods = {
   getCustomerById,
   getCustomerByNumber,
   getAllCustomerNames,
   getCustomerByName,
+  getCustomerBalanceByBranch,
 };

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAllBudgets, updateBudgetState } from '../controllers/bugetGetController.js';
+import { getAllBudgets, updateBudgetState } from '../controllers/bugetGetController.js'; 
 
 const router = Router();
 
