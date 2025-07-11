@@ -16,12 +16,12 @@ const getCustomerById = async (req) => {
     );
 
     // Depuración: Verificar los datos obtenidos de la base de datos
-    console.log("Datos del cliente:", results);
-    console.log(
-      "DescuentoHabitual:",
-      typeof results[0].DescuentoHabitual,
-      results[0].DescuentoHabitual
-    );
+    // console.log("Datos del cliente:", results);
+    // console.log(
+    //   "DescuentoHabitual:",
+    //   typeof results[0].DescuentoHabitual,
+    //   results[0].DescuentoHabitual
+    // );
 
     return results;
   } catch (error) {
