@@ -1,27 +1,12 @@
 import { Router } from 'express';
-import { getAllBudgets, updateBudgetState } from '../controllers/bugetGetController.js'; 
+import { methods as budgetController } from '../controllers/bugetGetController.js'; 
 
 const router = Router();
 
-router.get("/", async (req, res) => {
-  try {
-    const budgets = await getAllBudgets();
-    res.json(budgets);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Obtener presupuestos paginados: ?limit=20&offset=0
+router.get("/", budgetController.getBudgets);
 
-router.put("/:id", async (req, res) => {
-  const { id } = req.params;
-  const { estado } = req.body;
-
-  try {
-    const result = await updateBudgetState(id, estado);
-    res.status(200).send(result);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Cambiar estado del presupuesto por NroInterno
+router.put("/:nroInterno", budgetController.changeBudgetState);
 
 export default router;

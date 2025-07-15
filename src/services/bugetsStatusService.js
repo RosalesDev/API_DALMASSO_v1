@@ -1,11 +1,13 @@
-//service bugetstatusService.js
+// service bugetstatusService.js
 import { getConnection } from '../database/database.js';
 
- const getAllBudgets = async () => {
+// Obtener presupuestos paginados con sus ítems
+const getPaginatedBudgets = async (limit = 20, offset = 0) => {
   let connection;
   try {
     connection = await getConnection();
 
+    // 1. Presupuestos + info del cliente y vendedor
     const [budgetRows] = await connection.query(`
       SELECT
         p.IdCliente,
@@ -14,7 +16,6 @@ import { getConnection } from '../database/database.js';
         p.NroInterno,
         p.FechaALTA,
         p.MontoComprobante,
-        p.NroInterno,      
         c.Nombre AS NombreCliente,
         c.Domicilio,
         c.CUIT,
@@ -23,32 +24,43 @@ import { getConnection } from '../database/database.js';
       FROM presupuestos p
       LEFT JOIN clientes c ON p.IdCliente = c.IdCliente
       LEFT JOIN usuarios u ON p.IdVendedor = u.IdVendedor
-    `);
+      ORDER BY p.FechaALTA DESC
+      LIMIT ? OFFSET ?
+    `, [limit, offset]);
 
     if (budgetRows.length === 0) return [];
 
-    const budgetsWithItems = await Promise.all(
-      budgetRows.map(async (budget) => {
-        const [itemsRows] = await connection.query(
-          "SELECT * FROM presupuestos_articulos WHERE NroInterno = ?",
-          [budget.NroInterno]
-        );
-        return {
-          ...budget,
-          items: itemsRows,
-        };
-      })
+    // 2. Traer todos los ítems con un solo query
+    const nroInternos = budgetRows.map(b => b.NroInterno);
+    const [itemsRows] = await connection.query(
+      "SELECT * FROM presupuestos_articulos WHERE NroInterno IN (?)",
+      [nroInternos]
     );
+
+    // 3. Agrupar ítems por NroInterno
+    const itemsGrouped = itemsRows.reduce((acc, item) => {
+      if (!acc[item.NroInterno]) acc[item.NroInterno] = [];
+      acc[item.NroInterno].push(item);
+      return acc;
+    }, {});
+
+    // 4. Unir presupuestos con sus ítems
+    const budgetsWithItems = budgetRows.map(budget => ({
+      ...budget,
+      items: itemsGrouped[budget.NroInterno] || [],
+    }));
 
     return budgetsWithItems;
   } catch (err) {
-    console.error(`Error al obtener los presupuestos: ${err.message}`);
-    throw new Error(`Error al obtener los presupuestos: ${err.message}`);
+    console.error(`Error al obtener presupuestos paginados: ${err.message}`);
+    throw new Error('Error al obtener presupuestos paginados');
   }
 };
-const updateBudgetState = async (id, estado) => {
-  if (!id || !estado) {
-    throw new Error('ID del cliente y nuevo estado son requeridos');
+
+// Actualizar el estado del presupuesto
+const updateBudgetState = async (nroInterno, estado) => {
+  if (!nroInterno || !estado) {
+    throw new Error('NroInterno y nuevo estado son requeridos');
   }
 
   let connection;
@@ -56,8 +68,8 @@ const updateBudgetState = async (id, estado) => {
     connection = await getConnection();
 
     const [result] = await connection.query(
-      "UPDATE presupuestos SET Tipo = ? WHERE IdCliente = ? AND Tipo = 10",
-      [estado, id]
+      "UPDATE presupuestos SET Tipo = ? WHERE NroInterno = ? AND Tipo = 10",
+      [estado, nroInterno]
     );
 
     if (result.affectedRows === 0) {
@@ -71,8 +83,8 @@ const updateBudgetState = async (id, estado) => {
   }
 };
 
-
+// Exportar correctamente
 export const methods = {
-  getAllBudgets,
+  getPaginatedBudgets,
   updateBudgetState,
 };
