@@ -1,13 +1,11 @@
-// service bugetstatusService.js
 import { getConnection } from '../database/database.js';
 
-// Obtener presupuestos paginados con sus ítems
-const getPaginatedBudgets = async (limit = 20, offset = 0) => {
+const getPaginatedBudgets = async (limit, offset) => {
   let connection;
   try {
     connection = await getConnection();
 
-    // 1. Presupuestos + info del cliente y vendedor
+    console.log("⏳ Ejecutando consulta principal...");
     const [budgetRows] = await connection.query(`
       SELECT
         p.IdCliente,
@@ -24,43 +22,48 @@ const getPaginatedBudgets = async (limit = 20, offset = 0) => {
       FROM presupuestos p
       LEFT JOIN clientes c ON p.IdCliente = c.IdCliente
       LEFT JOIN usuarios u ON p.IdVendedor = u.IdVendedor
+      WHERE p.Tipo = 10
       ORDER BY p.FechaALTA DESC
       LIMIT ? OFFSET ?
     `, [limit, offset]);
 
-    if (budgetRows.length === 0) return [];
+    console.log("✅ Presupuestos encontrados:", budgetRows.length);
 
-    // 2. Traer todos los ítems con un solo query
-    const nroInternos = budgetRows.map(b => b.NroInterno);
-    const [itemsRows] = await connection.query(
-      "SELECT * FROM presupuestos_articulos WHERE NroInterno IN (?)",
-      [nroInternos]
+    const [[{ total }]] = await connection.query(`
+      SELECT COUNT(*) as total FROM presupuestos WHERE Tipo = 10
+    `);
+    console.log("📦 Total de presupuestos tipo 10:", total);
+
+    const budgetsWithItems = await Promise.all(
+      budgetRows.map(async (budget) => {
+        try {
+          const [itemsRows] = await connection.query(
+            "SELECT * FROM presupuestos_articulos WHERE NroInterno = ?",
+            [budget.NroInterno]
+          );
+          console.log(`🧾 Ítems para NroInterno ${budget.NroInterno}:`, itemsRows.length);
+          return {
+            ...budget,
+            items: itemsRows,
+          };
+        } catch (itemErr) {
+          console.error(`❌ Error al obtener ítems para ${budget.NroInterno}:`, itemErr.message);
+          return { ...budget, items: [] };
+        }
+      })
     );
 
-    // 3. Agrupar ítems por NroInterno
-    const itemsGrouped = itemsRows.reduce((acc, item) => {
-      if (!acc[item.NroInterno]) acc[item.NroInterno] = [];
-      acc[item.NroInterno].push(item);
-      return acc;
-    }, {});
-
-    // 4. Unir presupuestos con sus ítems
-    const budgetsWithItems = budgetRows.map(budget => ({
-      ...budget,
-      items: itemsGrouped[budget.NroInterno] || [],
-    }));
-
-    return budgetsWithItems;
+    return { data: budgetsWithItems, total };
   } catch (err) {
-    console.error(`Error al obtener presupuestos paginados: ${err.message}`);
-    throw new Error('Error al obtener presupuestos paginados');
+    console.error(`❌ Error en getPaginatedBudgets: ${err.message}`);
+    throw new Error(`Error al obtener presupuestos paginados: ${err.message}`);
   }
 };
 
-// Actualizar el estado del presupuesto
+// ✅ Aseguramos que también está esto
 const updateBudgetState = async (nroInterno, estado) => {
   if (!nroInterno || !estado) {
-    throw new Error('NroInterno y nuevo estado son requeridos');
+    throw new Error('NroInterno y estado son requeridos');
   }
 
   let connection;
@@ -73,17 +76,17 @@ const updateBudgetState = async (nroInterno, estado) => {
     );
 
     if (result.affectedRows === 0) {
-      throw new Error('No se encontró el presupuesto o ya ha sido procesado');
+      throw new Error('No se encontró el presupuesto o ya fue procesado');
     }
 
-    return { message: 'Estado del presupuesto actualizado correctamente' };
+    return { message: 'Estado actualizado correctamente' };
   } catch (err) {
-    console.error(`Error al actualizar el estado del presupuesto: ${err.message}`);
+    console.error(`❌ Error al actualizar presupuesto: ${err.message}`);
     throw new Error('Error interno del servidor');
   }
 };
 
-// Exportar correctamente
+// ✅ Export final
 export const methods = {
   getPaginatedBudgets,
   updateBudgetState,
