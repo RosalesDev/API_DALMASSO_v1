@@ -5,7 +5,7 @@ const getPaginatedBudgets = async (limit, offset) => {
   try {
     connection = await getConnection();
 
-    console.log("⏳ Ejecutando consulta principal...");
+    console.log("Ejecutando consulta principal...");
     const [budgetRows] = await connection.query(`
       SELECT
         p.IdCliente,

@@ -1,44 +1,45 @@
 import { getConnection } from "../database/database";
 
+// 🔹 Servicio privado: facturas por ID de cliente
 const getInvoicesByClientId = async (idCliente) => {
   try {
     const connection = await getConnection();
 
     const query = `
-    SELECT
-    f.Letra,
-    f.Boca,
-    f.Numero,
-    f.Fecha,
-    f.IdCliente,
-    f.NombreCondVenta,
-    f.Tipo,
-    f.Iva_Tipo,
-    xt.TipoIva AS Iva_Tipo_Descripcion,
-    f.DescuentoTotal,
-    f.NroInterno,
-    f.Pagada,
-    f.MontoComprobante,
-    f.PercepcionIIBB,
-    f.CAE_VENCIMIENTO,
-    f.CAE,
-    f.Subtotal2,
-    f.Total,
-    f.CodAfip,
-    fa.IdProducto,
-    fa.Cantidad,
-    fa.Detalle,
-    fa.Precio,
-    fa.Importe,
-    fa.Descuento,
-    fa.alic_iva,
-    (SELECT SUM(fa2.Importe * (fa2.alic_iva / 100))
-     FROM facturas_articulos fa2
-     WHERE fa2.NroInterno = f.NroInterno) AS IVA_Discriminado
-FROM facturas f
-LEFT JOIN facturas_articulos fa ON f.NroInterno = fa.NroInterno
-LEFT JOIN xtipoiva xt ON f.Iva_Tipo = xt.Codigo
-WHERE f.IdCliente = ?
+      SELECT
+        f.Letra,
+        f.Boca,
+        f.Numero,
+        f.Fecha,
+        f.IdCliente,
+        f.NombreCondVenta,
+        f.Tipo,
+        f.Iva_Tipo,
+        xt.TipoIva AS Iva_Tipo_Descripcion,
+        f.DescuentoTotal,
+        f.NroInterno,
+        f.Pagada,
+        f.MontoComprobante,
+        f.PercepcionIIBB,
+        f.CAE_VENCIMIENTO,
+        f.CAE,
+        f.Subtotal2,
+        f.Total,
+        f.CodAfip,
+        fa.IdProducto,
+        fa.Cantidad,
+        fa.Detalle,
+        fa.Precio,
+        fa.Importe,
+        fa.Descuento,
+        fa.alic_iva,
+        (SELECT SUM(fa2.Importe * (fa2.alic_iva / 100))
+         FROM facturas_articulos fa2
+         WHERE fa2.NroInterno = f.NroInterno) AS IVA_Discriminado
+      FROM facturas f
+      LEFT JOIN facturas_articulos fa ON f.NroInterno = fa.NroInterno
+      LEFT JOIN xtipoiva xt ON f.Iva_Tipo = xt.Codigo
+      WHERE f.IdCliente = ?
     `;
 
     const [results] = await connection.query(query, [idCliente]);
@@ -48,19 +49,22 @@ WHERE f.IdCliente = ?
 
       results.forEach(row => {
         const { NroInterno, ...invoiceData } = row;
-        const { IdProducto, Cantidad, Detalle, Precio, Importe, Descuento, alic_iva, IVA_Discriminado, Subtotal2, Total, ...rest } = invoiceData;
+        const {
+          IdProducto, Cantidad, Detalle, Precio, Importe, Descuento,
+          alic_iva, IVA_Discriminado, Subtotal2, Total, ...rest
+        } = invoiceData;
 
         if (!invoices[NroInterno]) {
           invoices[NroInterno] = {
             ...rest,
             articulos: [],
-            IVA_Discriminado: IVA_Discriminado ? parseFloat(IVA_Discriminado).toFixed(2) : 0.00,  // Formatear el IVA discriminado
-            Subtotal2: Subtotal2 ? parseFloat(Subtotal2).toFixed(2) : 0.00,
-            Total: Total ? parseFloat(Total).toFixed(2) : 0.00
+            IVA_Discriminado: IVA_Discriminado !== null ? parseFloat(IVA_Discriminado).toFixed(2) : "0.00",
+            Subtotal2: Subtotal2 !== null ? parseFloat(Subtotal2).toFixed(2) : "0.00",
+            Total: Total !== null ? parseFloat(Total).toFixed(2) : "0.00"
           };
         }
 
-        if (IdProducto) {
+        if (IdProducto !== null) {
           invoices[NroInterno].articulos.push({
             IdProducto,
             Cantidad,
@@ -75,35 +79,36 @@ WHERE f.IdCliente = ?
 
       return Object.values(invoices);
     } else {
-      throw new Error('Facturas no encontradas');
+      return [];
     }
   } catch (err) {
-    console.error("Error en la consulta:", err);
+    console.error("❌ Error en getInvoicesByClientId:", err.message);
     throw err;
   }
 };
 
-// Acceso público
+// 🔹 Servicio público: facturas por Número y Cuit
 const getInvoiceByPublicParams = async (Numero, Cuit) => {
   try {
-    console.log(`Parámetros recibidos: Numero=${Numero}, Cuit=${Cuit}`);
+    console.log(`📥 Parámetros recibidos: Numero=${Numero}, Cuit=${Cuit}`);
 
     const connection = await getConnection();
 
-    // ✅ Paso 1: obtener datos del cliente
+    //  obtener datos del cliente
     const clientQuery = `
       SELECT IdCliente, Nombre, Domicilio, CUIT FROM clientes WHERE Numero = ? AND Cuit = ?
     `;
     const [clientResults] = await connection.query(clientQuery, [Numero, Cuit]);
 
-    if (clientResults.length === 0) {
-      throw new Error('Cliente no encontrado');
+    if (!clientResults || clientResults.length === 0) {
+      console.warn(`⚠️ Cliente no encontrado: Numero=${Numero}, Cuit=${Cuit}`);
+      return { facturas: [], saldosPorSucursal: [], error: "Cliente no encontrado" };
     }
 
     const clientData = clientResults[0];
     const clientId = clientData.IdCliente;
 
-    // ✅ Paso 2: obtener las facturas del cliente
+    //  obtener las facturas del cliente
     const invoiceQuery = `
       SELECT
         f.Letra, f.Boca, f.Numero, f.Fecha, f.IdCliente, f.NombreCondVenta,
@@ -122,7 +127,12 @@ const getInvoiceByPublicParams = async (Numero, Cuit) => {
     `;
     const [results] = await connection.query(invoiceQuery, [clientId]);
 
-    // ✅ Paso 3: obtener saldos por sucursal
+    if (!results || results.length === 0) {
+      console.warn(`⚠️ No se encontraron facturas para IdCliente=${clientId}`);
+      return { facturas: [], saldosPorSucursal: [], error: "Facturas no encontradas para el cliente" };
+    }
+
+    // Paso 3: obtener saldos por sucursal
     const saldoQuery = `
       SELECT e.Nombre AS nombreSucursal, c.sucursal, SUM(c.Debe - c.Haber) AS saldo
       FROM ctacte c
@@ -132,11 +142,7 @@ const getInvoiceByPublicParams = async (Numero, Cuit) => {
     `;
     const [saldos] = await connection.query(saldoQuery, [clientId]);
 
-    if (results.length === 0) {
-      throw new Error('Factura no encontrada');
-    }
-
-    // ✅ Paso 4: organizar resultados
+    // Paso 4: organizar facturas
     const invoices = {};
     results.forEach(row => {
       const { NroInterno, ...invoiceData } = row;
@@ -149,34 +155,37 @@ const getInvoiceByPublicParams = async (Numero, Cuit) => {
         invoices[NroInterno] = {
           ...rest,
           articulos: [],
-          IVA_Discriminado: IVA_Discriminado ? parseFloat(IVA_Discriminado).toFixed(2) : 0.00,
-          Subtotal2: Subtotal2 ? parseFloat(Subtotal2).toFixed(2) : 0.00,
-          Total: Total ? parseFloat(Total).toFixed(2) : 0.00,
+          IVA_Discriminado: IVA_Discriminado !== null ? parseFloat(IVA_Discriminado).toFixed(2) : "0.00",
+          Subtotal2: Subtotal2 !== null ? parseFloat(Subtotal2).toFixed(2) : "0.00",
+          Total: Total !== null ? parseFloat(Total).toFixed(2) : "0.00",
           Nombre: clientData.Nombre,
           Domicilio: clientData.Domicilio,
           CUIT: clientData.CUIT
         };
       }
 
-      if (IdProducto) {
+      if (IdProducto !== null) {
         invoices[NroInterno].articulos.push({
           IdProducto, Cantidad, Detalle, Precio, Importe, Descuento, alic_iva
         });
       }
     });
 
-    // ✅ Paso 5: retornar facturas + saldos
     return {
       facturas: Object.values(invoices),
-      saldosPorSucursal: saldos
+      saldosPorSucursal: saldos || []
     };
 
   } catch (err) {
-    console.error("Error en la consulta para acceso público:", err);
-    throw err;
+    console.error("❌ Error en getInvoiceByPublicParams:", err.message);
+    return {
+      facturas: [],
+      saldosPorSucursal: [],
+      error: "Error interno en el servidor",
+      detalles: err.message
+    };
   }
 };
-
 
 
 export const getInvoice = {
