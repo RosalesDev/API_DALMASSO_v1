@@ -132,7 +132,7 @@ const getInvoiceByPublicParams = async (Numero, Cuit) => {
       return { facturas: [], saldosPorSucursal: [], error: "Facturas no encontradas para el cliente" };
     }
 
-    // Paso 3: obtener saldos por sucursal
+    //  obtener saldos por sucursal
     const saldoQuery = `
       SELECT e.Nombre AS nombreSucursal, c.sucursal, SUM(c.Debe - c.Haber) AS saldo
       FROM ctacte c
@@ -142,7 +142,7 @@ const getInvoiceByPublicParams = async (Numero, Cuit) => {
     `;
     const [saldos] = await connection.query(saldoQuery, [clientId]);
 
-    // Paso 4: organizar facturas
+    // organizar facturas
     const invoices = {};
     results.forEach(row => {
       const { NroInterno, ...invoiceData } = row;
