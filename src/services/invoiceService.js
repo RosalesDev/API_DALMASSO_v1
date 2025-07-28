@@ -14,6 +14,7 @@ const getInvoicesByClientId = async (idCliente) => {
         f.IdCliente,
         f.NombreCondVenta,
         f.Tipo,
+        tc.Nombre AS TipoDescripcion,
         f.Iva_Tipo,
         xt.TipoIva AS Iva_Tipo_Descripcion,
         f.DescuentoTotal,
@@ -39,6 +40,7 @@ const getInvoicesByClientId = async (idCliente) => {
       FROM facturas f
       LEFT JOIN facturas_articulos fa ON f.NroInterno = fa.NroInterno
       LEFT JOIN xtipoiva xt ON f.Iva_Tipo = xt.Codigo
+      LEFT JOIN xtipocomp tc ON f.Tipo = tc.Codigo
       WHERE f.IdCliente = ?
     `;
 
@@ -50,7 +52,7 @@ const getInvoicesByClientId = async (idCliente) => {
       results.forEach(row => {
         const { NroInterno, ...invoiceData } = row;
         const {
-          IdProducto, Cantidad, Detalle, Precio, Importe, Descuento,
+          IdProducto,Numero, Cantidad, Detalle, Precio, Importe, Descuento,
           alic_iva, IVA_Discriminado, Subtotal2, Total, ...rest
         } = invoiceData;
 
@@ -67,6 +69,7 @@ const getInvoicesByClientId = async (idCliente) => {
         if (IdProducto !== null) {
           invoices[NroInterno].articulos.push({
             IdProducto,
+            Numero,
             Cantidad,
             Detalle,
             Precio,
@@ -94,7 +97,7 @@ const getInvoiceByPublicParams = async (Numero, Cuit) => {
 
     const connection = await getConnection();
 
-    //  obtener datos del cliente
+    // obtener datos del cliente
     const clientQuery = `
       SELECT IdCliente, Nombre, Domicilio, CUIT FROM clientes WHERE Numero = ? AND Cuit = ?
     `;
@@ -108,21 +111,43 @@ const getInvoiceByPublicParams = async (Numero, Cuit) => {
     const clientData = clientResults[0];
     const clientId = clientData.IdCliente;
 
-    //  obtener las facturas del cliente
+    // obtener las facturas del cliente
     const invoiceQuery = `
       SELECT
-        f.Letra, f.Boca, f.Numero, f.Fecha, f.IdCliente, f.NombreCondVenta,
-        f.Tipo, f.Iva_Tipo, xt.TipoIva AS Iva_Tipo_Descripcion,
-        f.DescuentoTotal, f.NroInterno, f.Pagada, f.MontoComprobante,
-        f.PercepcionIIBB, f.CAE_VENCIMIENTO, f.CAE, f.Subtotal2, f.Total, f.CodAfip,
-        fa.IdProducto, fa.Cantidad, fa.Detalle, fa.Precio, fa.Importe,
-        fa.Descuento, fa.alic_iva,
+        f.Letra,
+        f.Boca,
+        f.Numero,
+        f.Fecha,
+        f.IdCliente,
+        f.NombreCondVenta,
+        f.Tipo,
+        tc.Nombre AS TipoDescripcion,
+        f.Iva_Tipo,
+        xt.TipoIva AS Iva_Tipo_Descripcion,
+        f.DescuentoTotal,
+        f.NroInterno,
+        f.Pagada,
+        f.MontoComprobante,
+        f.PercepcionIIBB,
+        f.CAE_VENCIMIENTO,
+        f.CAE,
+        f.Subtotal2,
+        f.Total,
+        f.CodAfip,
+        fa.IdProducto,
+        fa.Cantidad,
+        fa.Detalle,
+        fa.Precio,
+        fa.Importe,
+        fa.Descuento,
+        fa.alic_iva,
         (SELECT SUM(fa2.Importe * (fa2.alic_iva / 100))
          FROM facturas_articulos fa2
          WHERE fa2.NroInterno = f.NroInterno) AS IVA_Discriminado
       FROM facturas f
       LEFT JOIN facturas_articulos fa ON f.NroInterno = fa.NroInterno
       LEFT JOIN xtipoiva xt ON f.Iva_Tipo = xt.Codigo
+      LEFT JOIN xtipocomp tc ON f.Tipo = tc.Codigo
       WHERE f.IdCliente = ?
     `;
     const [results] = await connection.query(invoiceQuery, [clientId]);
@@ -132,7 +157,7 @@ const getInvoiceByPublicParams = async (Numero, Cuit) => {
       return { facturas: [], saldosPorSucursal: [], error: "Facturas no encontradas para el cliente" };
     }
 
-    //  obtener saldos por sucursal
+    // obtener saldos por sucursal
     const saldoQuery = `
       SELECT e.Nombre AS nombreSucursal, c.sucursal, SUM(c.Debe - c.Haber) AS saldo
       FROM ctacte c
@@ -147,7 +172,7 @@ const getInvoiceByPublicParams = async (Numero, Cuit) => {
     results.forEach(row => {
       const { NroInterno, ...invoiceData } = row;
       const {
-        IdProducto, Cantidad, Detalle, Precio, Importe, Descuento,
+        IdProducto,Numero, Cantidad, Detalle, Precio, Importe, Descuento,
         alic_iva, IVA_Discriminado, Subtotal2, Total, ...rest
       } = invoiceData;
 
@@ -166,7 +191,7 @@ const getInvoiceByPublicParams = async (Numero, Cuit) => {
 
       if (IdProducto !== null) {
         invoices[NroInterno].articulos.push({
-          IdProducto, Cantidad, Detalle, Precio, Importe, Descuento, alic_iva
+          IdProducto, Numero, Cantidad, Detalle, Precio, Importe, Descuento, alic_iva
         });
       }
     });
@@ -186,7 +211,6 @@ const getInvoiceByPublicParams = async (Numero, Cuit) => {
     };
   }
 };
-
 
 export const getInvoice = {
   getInvoicesByClientId,
