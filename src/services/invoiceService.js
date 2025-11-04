@@ -9,7 +9,7 @@ const getInvoicesByClientId = async (idCliente) => {
       SELECT
         f.Letra,
         f.Boca,
-        f.Numero,
+        f.Numero AS NumeroComprobante,
         f.Fecha,
         f.IdCliente,
         f.NombreCondVenta,
@@ -55,6 +55,8 @@ const getInvoicesByClientId = async (idCliente) => {
           IdProducto,Numero, Cantidad, Detalle, Precio, Importe, Descuento,
           alic_iva, IVA_Discriminado, Subtotal2, Total, ...rest
         } = invoiceData;
+
+    
 
         if (!invoices[NroInterno]) {
           invoices[NroInterno] = {
@@ -116,7 +118,7 @@ const getInvoiceByPublicParams = async (Numero, Cuit) => {
       SELECT
         f.Letra,
         f.Boca,
-        f.Numero,
+        f.Numero AS NumeroComprobante,
         f.Fecha,
         f.IdCliente,
         f.NombreCondVenta,
@@ -167,7 +169,7 @@ const getInvoiceByPublicParams = async (Numero, Cuit) => {
     `;
     const [saldos] = await connection.query(saldoQuery, [clientId]);
 
-    // organizar facturas
+  
     const invoices = {};
     results.forEach(row => {
       const { NroInterno, ...invoiceData } = row;
@@ -195,6 +197,11 @@ const getInvoiceByPublicParams = async (Numero, Cuit) => {
         });
       }
     });
+
+
+
+    // depuracion 
+      console.log("Facturas antes de devolver:", invoices);
 
     return {
       facturas: Object.values(invoices),

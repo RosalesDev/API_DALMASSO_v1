@@ -6,6 +6,7 @@ import productRoutes from "./routes/Products";
 import customerRoutes from "./routes/Customers";
 import companyRoutes from "./routes/Company";
 import invoiceRoutes from "./routes/Invoice";
+import stockRoutes from "./routes/stock.js";
 import bugetGet from "./routes/bugetGet";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -28,5 +29,6 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/companies", companyRoutes);
 app.use("/api/invoices", invoiceRoutes); 
 app.use("/api/bugetStatus", bugetGet);
+app.use("/api/stock", stockRoutes);
 
 export default app;
